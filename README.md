@@ -1,4 +1,4 @@
-# Chat Analysis Project
+# Whatsapp Chat Analysis Project
 
 ## Overview
 This project is designed to analyze chat logs and generate psychological profiles based on the conversation patterns. It uses OpenAI's GPT-4 model to process and analyze text data, providing insights into personality traits, communication styles, and behavioral patterns.

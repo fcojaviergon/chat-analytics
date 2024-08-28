@@ -36,7 +36,7 @@ Eres un analista experto en perfiles psicol√≥gicos y comportamiento humano. Bas√
 """
 
 def truncate_text(text, max_tokens):
-    encoding = tiktoken.encoding_for_model("gpt-4")
+    encoding = tiktoken.encoding_for_model("gpt2")
     tokens = encoding.encode(text)
     
     if len(tokens) <= max_tokens:
@@ -57,7 +57,7 @@ async def analyze_summaries(summaries_file):
         combined_summary = file.read()
 
     # Calculate available tokens
-    encoding = tiktoken.encoding_for_model("gpt-4")
+    encoding = tiktoken.encoding_for_model("gpt2")
     prompt_tokens = len(encoding.encode(ANALYSIS_PROMPT))
     available_tokens = MAX_TOKENS - RESERVE_TOKENS - prompt_tokens
 
@@ -71,7 +71,7 @@ async def analyze_summaries(summaries_file):
         print(f"Warning: The summary was truncated from {original_tokens} tokens to {truncated_tokens} tokens to fit within the token limit.")
 
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": ANALYSIS_PROMPT},
             {"role": "user", "content": truncated_summary}
