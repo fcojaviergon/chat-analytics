@@ -5,9 +5,14 @@ import os
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 import tiktoken
+from langsmith import Client
+from langsmith.run_helpers import traceable
 
 # Load environment variables
 load_dotenv()
+
+# Configure LangSmith
+langsmith_client = Client()
 
 # Configure your OpenAI API key
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -52,6 +57,7 @@ def truncate_text(text, max_tokens):
     
     return truncated_text
 
+@traceable(run_type="chain")
 async def analyze_summaries(summaries_file):
     with open(summaries_file, 'r', encoding='utf-8') as file:
         combined_summary = file.read()
@@ -80,6 +86,7 @@ async def analyze_summaries(summaries_file):
     )
     return response.choices[0].message.content
 
+@traceable(run_type="chain")
 def analyze_profile(summaries_file, output_file):
     print("Performing final analysis on summaries...")
     final_analysis = asyncio.run(analyze_summaries(summaries_file))

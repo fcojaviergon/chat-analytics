@@ -5,10 +5,14 @@ import re
 import asyncio
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
-from transformers import GPT2Tokenizer
-
+import tiktoken
+from langsmith import Client
+from langsmith.run_helpers import traceable
 # Load environment variables
 load_dotenv()
+
+# Configure LangSmith
+langsmith_client = Client()
 
 # Configure your OpenAI API key
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -25,7 +29,7 @@ Eres un experto en resumir conversaciones. Tu tarea es condensar el texto propor
     5. Intereses y preocupaciones recurrentes
     Proporciona un resumen conciso pero informativo que capture la esencia de las conversaciones y sea útil para un análisis posterior de personalidad.
 """
-
+@traceable(run_type="chain")
 def extract_profile_lines(input_file, output_file, name_pattern):
     pattern = r'^\[\d{2}-\d{2}-\d{2},\s\d{1,2}:\d{2}:\d{2}\s[AP]M\]\s' + name_pattern
     
@@ -40,7 +44,8 @@ def extract_profile_lines(input_file, output_file, name_pattern):
                     outfile.write(clean_line + "\n")
     except IOError as e:
         print(f"Error processing {input_file}: {e}")
-
+        
+@traceable(run_type="chain")
 def process_directory(directory, output_file, name_pattern):
     for root, _, files in os.walk(directory):
         for file in files:
@@ -49,26 +54,29 @@ def process_directory(directory, output_file, name_pattern):
                 extract_profile_lines(input_file, output_file, name_pattern)
                 print(f"Processed: {input_file}")
 
+
+@traceable(run_type="chain")
 def chunk_text(text, max_tokens=CHUNK_SIZE):
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    tokens = tokenizer.encode(text)
+    encoding = tiktoken.encoding_for_model("gpt2")  # Usamos el encoding para GPT-4
+    tokens = encoding.encode(text)
     chunks = []
     current_chunk = []
     current_length = 0
 
     for token in tokens:
         if current_length + 1 > max_tokens:
-            chunks.append(tokenizer.decode(current_chunk))
+            chunks.append(encoding.decode(current_chunk))
             current_chunk = []
             current_length = 0
         current_chunk.append(token)
         current_length += 1
 
     if current_chunk:
-        chunks.append(tokenizer.decode(current_chunk))
+        chunks.append(encoding.decode(current_chunk))
 
     return chunks
 
+@traceable(run_type="chain")
 async def summarize_text(text):
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
@@ -80,6 +88,7 @@ async def summarize_text(text):
     )
     return response.choices[0].message.content
 
+@traceable(run_type="chain")
 async def generate_summaries(input_file, summaries_file):
     try:
         with open(input_file, 'r', encoding='utf-8') as file:
