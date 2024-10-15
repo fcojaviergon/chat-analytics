@@ -8,26 +8,32 @@ from openai import AsyncOpenAI
 import tiktoken
 from langsmith import Client
 from langsmith.run_helpers import traceable
+from langsmith.wrappers import wrap_openai
+
 # Load environment variables
 load_dotenv()
 
 # Configure LangSmith
 langsmith_client = Client()
 
-# Configure your OpenAI API key
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Envuelve el cliente de OpenAI con LangSmith
+client = wrap_openai(AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY")))
+
+
 # Constants for token limits
 CHUNK_SIZE = 7000
 
 # Prompt for summarization
 SUMMARY_PROMPT = """
-Eres un experto en resumir conversaciones. Tu tarea es condensar el texto proporcionado, manteniendo los elementos más relevantes para un análisis de personalidad y comportamiento. Enfócate en preservar:
-    1. Temas principales discutidos
-    2. Patrones de lenguaje y expresiones frecuentes
-    3. Tono emocional y actitud general
-    4. Interacciones sociales y dinámicas de conversación
-    5. Intereses y preocupaciones recurrentes
-    Proporciona un resumen conciso pero informativo que capture la esencia de las conversaciones y sea útil para un análisis posterior de personalidad.
+You are an expert in summarizing conversations. Your task is to condense the provided text, maintaining the most relevant elements for personality and behavior analysis. Focus on preserving:
+
+1. Main topics discussed
+2. Language patterns and frequent expressions
+3. Emotional tone and general attitude
+4. Social interactions and conversation dynamics
+5. Recurring interests and concerns
+
+Provide a concise yet informative summary that captures the essence of the conversations and is useful for subsequent personality analysis.
 """
 @traceable(run_type="chain")
 def extract_profile_lines(input_file, output_file, name_pattern):

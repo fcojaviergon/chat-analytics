@@ -7,6 +7,7 @@ from openai import AsyncOpenAI
 import tiktoken
 from langsmith import Client
 from langsmith.run_helpers import traceable
+from langsmith.wrappers import wrap_openai
 
 # Load environment variables
 load_dotenv()
@@ -14,8 +15,8 @@ load_dotenv()
 # Configure LangSmith
 langsmith_client = Client()
 
-# Configure your OpenAI API key
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Envuelve el cliente de OpenAI con LangSmith
+client = wrap_openai(AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY")))
 
 # Constants
 MAX_TOKENS = 8192
@@ -23,21 +24,22 @@ RESERVE_TOKENS = 1500  # Reserve tokens for the response
 
 # Prompt for detailed analysis
 ANALYSIS_PROMPT = """
-Eres un analista experto en perfiles psicológicos y comportamiento humano. Basándote en el resumen de conversaciones proporcionado, genera un análisis detallado del perfil de la persona, incluyendo:
+You are an expert analyst in psychological profiles and human behavior. Based on the provided conversation summary, generate a detailed analysis of the person's profile, including:
 
-    1. Rasgos de personalidad dominantes
-    2. Intereses y pasiones
-    3. Patrones de comunicación
-    4. Estilo de interacción social
-    5. Posibles motivaciones y valores
-    6. Estado emocional general
-    7. Nivel de formalidad y educación
-    8. Uso del humor y creatividad
-    9. Asertividad y liderazgo
-    10. Preocupaciones o temas recurrentes
+1. Dominant personality traits
+2. Interests and passions
+3. Communication patterns
+4. Social interaction style
+5. Possible motivations and values
+6. General emotional state
+7. Level of formality and education
+8. Use of humor and creativity
+9. Assertiveness and leadership
+10. Recurring concerns or themes
 
-    Proporciona un análisis detallado y fundamentado, citando ejemplos específicos del resumen cuando sea posible. Concluye con un perfil psicológico conciso pero completo de la persona.
-    Generar esto en formato markdown.
+Provide a detailed and well-founded analysis, citing specific examples from the summary when possible. Conclude with a concise yet comprehensive psychological profile of the person.
+
+Generate this response in markdown format, using appropriate headers, bullet points, and emphasis where necessary.
 """
 
 def truncate_text(text, max_tokens):
