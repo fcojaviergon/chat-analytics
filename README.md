@@ -83,7 +83,7 @@ To view your project's metrics:
 Contributions to improve the project are welcome. Please feel free to submit pull requests or open issues to discuss potential changes or enhancements.
 
 ## License
-[Specify your chosen license here, e.g., MIT, GPL, etc.]
+MIT
 
 ## Disclaimer
 This tool is for research and personal use only. Always respect privacy and obtain necessary permissions before analyzing someone's chat logs. The psychological insights provided should not be considered as professional psychological advice.
