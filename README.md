@@ -16,6 +16,8 @@ This project is designed to analyze chat logs, particularly from WhatsApp, and g
 - OpenAI API key
 - LangSmith API key
 
+<iframe width="560" height="315" src="https://youtu.be/Z40RBqmlUY4" frameborder="0" allowfullscreen></iframe>
+
 ## Installation
 
 1. Clone the repository:
